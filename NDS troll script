@@ -1,262 +1,123 @@
--- MythraHub - Özgün Tasarımlı Tam Menü
-local Players = game:GetService("Players")
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/sirius'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "MythraHub",
+    LoadingTitle = "MythraHub Loading...",
+    LoadingSubtitle = "Premium Script Hub",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "MythraHubConfigs",
+        FileName = "Settings"
+    }
+})
+
+-- Fly Script
+local flyEnabled = false
+local Player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
--- Ana GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MythraHub"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
-
--- Ana Frame (Yuvarlak köşeler, gölge, premium renkler)
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 320, 0, 420)
-Frame.Position = UDim2.new(0.5, -160, 0.5, -210)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-Frame.BorderSizePixel = 0
-Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-Frame.ClipsDescendants = true
-Frame.Parent = ScreenGui
-
--- Köşe yuvarlama
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 15)
-UICorner.Parent = Frame
-
--- Gölgeli efekti için UIStroke
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Thickness = 2
-UIStroke.Color = Color3.fromRGB(100, 100, 110)
-UIStroke.Parent = Frame
-
--- Başlık
-local Title = Instance.new("TextLabel")
-Title.Text = "MythraHub"
-Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 28
-Title.TextColor3 = Color3.fromRGB(230, 230, 230)
-Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.Parent = Frame
-
--- Kapatma butonu
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Text = "✕"
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 26
-CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.Size = UDim2.new(0, 40, 0, 40)
-CloseBtn.Position = UDim2.new(1, -45, 0, 5)
-CloseBtn.Parent = Frame
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui.Enabled = false
+local hrp = nil
+Player.CharacterAdded:Connect(function(char)
+    hrp = char:WaitForChild("HumanoidRootPart")
 end)
-
--- Buton oluşturma fonksiyonu (tek tip, hover efektli)
-local function createButton(name, position, parent)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 280, 0, 40)
-    btn.Position = position
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    btn.BorderSizePixel = 0
-    btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 18
-    btn.TextColor3 = Color3.fromRGB(210, 210, 210)
-    btn.Text = name
-    btn.AutoButtonColor = false
-    btn.Parent = parent
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 10)
-    corner.Parent = btn
-
-    btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(65, 65, 75)
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    end)
-    btn.MouseLeave:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-        btn.TextColor3 = Color3.fromRGB(210, 210, 210)
-    end)
-
-    return btn
+if Player.Character then
+    hrp = Player.Character:FindFirstChild("HumanoidRootPart")
 end
 
--- BTools Butonu
-local BToolsBtn = createButton("BTools Aç/Kapat", UDim2.new(0, 20, 0, 70), Frame)
-local btoolsActive = false
-BToolsBtn.MouseButton1Click:Connect(function()
-    if not btoolsActive then
-        loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
-        btoolsActive = true
-    else
-        -- Kapatma scripti yoksa menüde sadece aktiflik durumunu değiştiriyoruz.
-        btoolsActive = false
+local function move(delta)
+    if hrp then
+        hrp.CFrame = hrp.CFrame * CFrame.new(0, 10 * delta, 0)
     end
-end)
+end
 
--- Eski Fly Butonu (WASD + Space + Ctrl)
-local FlyBtn = createButton("Fly Aç/Kapat", UDim2.new(0, 20, 0, 120), Frame)
-local flyActive = false
-local bodyGyro, bodyVelocity
-local inputConnectionBegan, inputConnectionEnded, heartbeatConnection
+local inputConnection
 
-FlyBtn.MouseButton1Click:Connect(function()
-    local character = LocalPlayer.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    flyActive = not flyActive
-
-    if flyActive then
-        bodyGyro = Instance.new("BodyGyro", hrp)
-        bodyGyro.P = 9e4
-        bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-        bodyGyro.CFrame = hrp.CFrame
-
-        bodyVelocity = Instance.new("BodyVelocity", hrp)
-        bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-
-        local moveVec = Vector3.new(0, 0, 0)
-
-        inputConnectionBegan = UserInputService.InputBegan:Connect(function(input, processed)
-            if processed then return end
-            if input.KeyCode == Enum.KeyCode.W then
-                moveVec = moveVec + workspace.CurrentCamera.CFrame.LookVector
-            elseif input.KeyCode == Enum.KeyCode.S then
-                moveVec = moveVec - workspace.CurrentCamera.CFrame.LookVector
-            elseif input.KeyCode == Enum.KeyCode.A then
-                moveVec = moveVec - workspace.CurrentCamera.CFrame.RightVector
-            elseif input.KeyCode == Enum.KeyCode.D then
-                moveVec = moveVec + workspace.CurrentCamera.CFrame.RightVector
-            elseif input.KeyCode == Enum.KeyCode.Space then
-                moveVec = moveVec + Vector3.new(0, 1, 0)
-            elseif input.KeyCode == Enum.KeyCode.LeftControl then
-                moveVec = moveVec - Vector3.new(0, 1, 0)
+local FlyToggle = Window:CreateToggle({
+    Name = "Fly (Press P to go Up)",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(value)
+        flyEnabled = value
+        if flyEnabled then
+            inputConnection = UIS.InputBegan:Connect(function(input, processed)
+                if processed then return end
+                if input.UserInputType == Enum.UserInputType.Keyboard then
+                    if input.KeyCode == Enum.KeyCode.P then
+                        move(1)
+                    end
+                end
+            end)
+        else
+            if inputConnection then
+                inputConnection:Disconnect()
+                inputConnection = nil
             end
-        end)
-
-        inputConnectionEnded = UserInputService.InputEnded:Connect(function(input, processed)
-            if processed then return end
-            if input.KeyCode == Enum.KeyCode.W then
-                moveVec = moveVec - workspace.CurrentCamera.CFrame.LookVector
-            elseif input.KeyCode == Enum.KeyCode.S then
-                moveVec = moveVec + workspace.CurrentCamera.CFrame.LookVector
-            elseif input.KeyCode == Enum.KeyCode.A then
-                moveVec = moveVec + workspace.CurrentCamera.CFrame.RightVector
-            elseif input.KeyCode == Enum.KeyCode.D then
-                moveVec = moveVec - workspace.CurrentCamera.CFrame.RightVector
-            elseif input.KeyCode == Enum.KeyCode.Space then
-                moveVec = moveVec - Vector3.new(0, 1, 0)
-            elseif input.KeyCode == Enum.KeyCode.LeftControl then
-                moveVec = moveVec + Vector3.new(0, 1, 0)
-            end
-        end)
-
-        heartbeatConnection = RunService.Heartbeat:Connect(function()
-            if flyActive then
-                bodyGyro.CFrame = workspace.CurrentCamera.CFrame
-                bodyVelocity.Velocity = moveVec.Unit * 50
-            else
-                heartbeatConnection:Disconnect()
-            end
-        end)
-
-    else
-        if bodyGyro then bodyGyro:Destroy() end
-        if bodyVelocity then bodyVelocity:Destroy() end
-        if inputConnectionBegan then inputConnectionBegan:Disconnect() end
-        if inputConnectionEnded then inputConnectionEnded:Disconnect() end
-        if heartbeatConnection then heartbeatConnection:Disconnect() end
-    end
-end)
-
--- JerkOff Tool R6
-local JerkOffR6Btn = createButton("JerkOff Tool R6", UDim2.new(0, 20, 0, 170), Frame)
-JerkOffR6Btn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
-end)
-
--- JerkOff Tool R15
-local JerkOffR15Btn = createButton("JerkOff Tool R15", UDim2.new(0, 20, 0, 220), Frame)
-JerkOffR15Btn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
-end)
-
--- Fart Sound
-local FartSoundBtn = createButton("Fart Sound", UDim2.new(0, 20, 0, 270), Frame)
-FartSoundBtn.MouseButton1Click:Connect(function()
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = "rbxassetid://8430024127"
-    sound.Volume = 1
-    sound:Play()
-    game:GetService("Debris"):AddItem(sound, 5)
-end)
-
--- Screaming Sound
-local ScreamSoundBtn = createButton("Scream Sound", UDim2.new(0, 20, 0, 320), Frame)
-ScreamSoundBtn.MouseButton1Click:Connect(function()
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = "rbxassetid://9125712561"
-    sound.Volume = 1
-    sound:Play()
-    game:GetService("Debris"):AddItem(sound, 5)
-end)
-
--- Laugh Sound (Adı Ahhhh)
-local LaughSoundBtn = createButton("Laugh (Ahhhh)", UDim2.new(0, 20, 0, 370), Frame)
-LaughSoundBtn.MouseButton1Click:Connect(function()
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = "rbxassetid://8449305114"
-    sound.Volume = 1
-    sound:Play()
-    game:GetService("Debris"):AddItem(sound, 5)
-end)
-
--- Fake Admin Message (Basit)
-local FakeAdminBtn = createButton("Fake Admin Message Gönder", UDim2.new(0, 20, 0, 420), Frame)
-FakeAdminBtn.MouseButton1Click:Connect(function()
-    local message = "[Admin] " .. LocalPlayer.Name .. ": MythraHub Aktif!"
-    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(message, "All")
-end)
-
--- Spin Efekti (Hız 1000)
-local SpinBtn = createButton("Spin Aç/Kapat (Hız: 1000)", UDim2.new(0, 20, 0, 470), Frame)
-local spinActive = false
-local spinConnection
-
-SpinBtn.MouseButton1Click:Connect(function()
-    spinActive = not spinActive
-    local character = LocalPlayer.Character
-    if not character then return end
-    local hrp = character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    if spinActive then
-        spinConnection = RunService.Heartbeat:Connect(function(dt)
-            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(1000) * dt, 0)
-        end)
-    else
-        if spinConnection then
-            spinConnection:Disconnect()
         end
     end
-end)
+})
 
--- Ölümde GUI kalması için
-LocalPlayer.CharacterRemoving:Connect(function()
-    ScreenGui.Parent = PlayerGui
-end)
+-- BTools
+Window:CreateButton({
+    Name = "BTools",
+    Callback = function()
+        loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
+    end
+})
 
-LocalPlayer.CharacterAdded:Connect(function()
-    ScreenGui.Parent = PlayerGui
-end)
+-- Jerk Off Tool R6
+Window:CreateButton({
+    Name = "Jerk Off Tool (R6)",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
+    end
+})
 
-return ScreenGui
+-- Jerk Off Tool R15
+Window:CreateButton({
+    Name = "Jerk Off Tool (R15)",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
+    end
+})
+
+-- Fart Sound
+Window:CreateButton({
+    Name = "Fart Sound",
+    Callback = function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://8430024127"
+        sound.Parent = workspace
+        sound.Volume = 5
+        sound:Play()
+        game:GetService("Debris"):AddItem(sound, 3)
+    end
+})
+
+-- Laugh Sound (Adı: Ahhhh)
+Window:CreateButton({
+    Name = "Laugh Sound",
+    Callback = function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://8449305114"  -- Laugh sound id
+        sound.Parent = workspace
+        sound.Volume = 5
+        sound:Play()
+        game:GetService("Debris"):AddItem(sound, 3)
+    end
+})
+
+-- Screaming Sound
+Window:CreateButton({
+    Name = "Screaming Sound",
+    Callback = function()
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://9125712561"  -- Screaming sound id
+        sound.Parent = workspace
+        sound.Volume = 5
+        sound:Play()
+        game:GetService("Debris"):AddItem(sound, 3)
+    end
+})
+
+print("MythraHub Menu Loaded with all features!")
