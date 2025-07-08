@@ -1,123 +1,110 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/sirius'))()
+--[[
+  MythraHub | Full GUI Menü
+  İçerikler: BTools, Fly, Fart, Laugh, Screaming, JerkOff Tool (R6 & R15), Admin Message
+--]]
 
-local Window = Rayfield:CreateWindow({
-    Name = "MythraHub",
-    LoadingTitle = "MythraHub Loading...",
-    LoadingSubtitle = "Premium Script Hub",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "MythraHubConfigs",
-        FileName = "Settings"
-    }
-})
+-- GUI Oluşturma
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "MythraHub"
+gui.ResetOnSpawn = false
 
--- Fly Script
-local flyEnabled = false
-local Player = game.Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local toggle = Instance.new("TextButton", gui)
+toggle.Size = UDim2.new(0, 60, 0, 60)
+toggle.Position = UDim2.new(0, 10, 0, 10)
+toggle.Text = "Mythra"
+toggle.BackgroundColor3 = Color3.fromRGB(20,20,20)
+toggle.TextColor3 = Color3.fromRGB(255,255,255)
+toggle.BorderSizePixel = 0
 
-local hrp = nil
-Player.CharacterAdded:Connect(function(char)
-    hrp = char:WaitForChild("HumanoidRootPart")
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 320, 0, 400)
+main.Position = UDim2.new(0, 80, 0, 100)
+main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+main.Visible = true
+main.BorderSizePixel = 0
+
+toggle.MouseButton1Click:Connect(function()
+	main.Visible = not main.Visible
 end)
-if Player.Character then
-    hrp = Player.Character:FindFirstChild("HumanoidRootPart")
+
+-- Buton Oluşturma Fonksiyonu
+local function createButton(text, posY, callback)
+	local btn = Instance.new("TextButton", main)
+	btn.Size = UDim2.new(0, 300, 0, 35)
+	btn.Position = UDim2.new(0, 10, 0, posY)
+	btn.Text = text
+	btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.BorderSizePixel = 0
+	btn.MouseButton1Click:Connect(callback)
 end
-
-local function move(delta)
-    if hrp then
-        hrp.CFrame = hrp.CFrame * CFrame.new(0, 10 * delta, 0)
-    end
-end
-
-local inputConnection
-
-local FlyToggle = Window:CreateToggle({
-    Name = "Fly (Press P to go Up)",
-    CurrentValue = false,
-    Flag = "FlyToggle",
-    Callback = function(value)
-        flyEnabled = value
-        if flyEnabled then
-            inputConnection = UIS.InputBegan:Connect(function(input, processed)
-                if processed then return end
-                if input.UserInputType == Enum.UserInputType.Keyboard then
-                    if input.KeyCode == Enum.KeyCode.P then
-                        move(1)
-                    end
-                end
-            end)
-        else
-            if inputConnection then
-                inputConnection:Disconnect()
-                inputConnection = nil
-            end
-        end
-    end
-})
 
 -- BTools
-Window:CreateButton({
-    Name = "BTools",
-    Callback = function()
-        loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
-    end
-})
+createButton("BTools", 0.02, function()
+	loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
+end)
 
--- Jerk Off Tool R6
-Window:CreateButton({
-    Name = "Jerk Off Tool (R6)",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
-    end
-})
-
--- Jerk Off Tool R15
-Window:CreateButton({
-    Name = "Jerk Off Tool (R15)",
-    Callback = function()
-        loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
-    end
-})
+-- Fly (P tuşuna basınca yukarı zıplar)
+createButton("Fly (P ile uç)", 0.13, function()
+	local UIS = game:GetService("UserInputService")
+	local RunService = game:GetService("RunService")
+	local function move(delta)
+		player.Character:WaitForChild("HumanoidRootPart").CFrame *= CFrame.new(0, 10 * delta, 0)
+	end
+	UIS.InputBegan:Connect(function(input, gameProcessedEvent)
+		if gameProcessedEvent then return end
+		if input.UserInputType == Enum.UserInputType.Keyboard then
+			if input.KeyCode == Enum.KeyCode.P then
+				move(1)
+			end
+		end
+	end)
+end)
 
 -- Fart Sound
-Window:CreateButton({
-    Name = "Fart Sound",
-    Callback = function()
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://8430024127"
-        sound.Parent = workspace
-        sound.Volume = 5
-        sound:Play()
-        game:GetService("Debris"):AddItem(sound, 3)
-    end
-})
-
--- Laugh Sound (Adı: Ahhhh)
-Window:CreateButton({
-    Name = "Laugh Sound",
-    Callback = function()
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://8449305114"  -- Laugh sound id
-        sound.Parent = workspace
-        sound.Volume = 5
-        sound:Play()
-        game:GetService("Debris"):AddItem(sound, 3)
-    end
-})
+createButton("Fart Sound", 0.24, function()
+	local sound = Instance.new("Sound", workspace)
+	sound.SoundId = "rbxassetid://8430024127"
+	sound.Volume = 10
+	sound:Play()
+end)
 
 -- Screaming Sound
-Window:CreateButton({
-    Name = "Screaming Sound",
-    Callback = function()
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://9125712561"  -- Screaming sound id
-        sound.Parent = workspace
-        sound.Volume = 5
-        sound:Play()
-        game:GetService("Debris"):AddItem(sound, 3)
-    end
-})
+createButton("Screaming Sound", 0.35, function()
+	local sound = Instance.new("Sound", workspace)
+	sound.SoundId = "rbxassetid://9125712561"
+	sound.Volume = 10
+	sound:Play()
+end)
 
-print("MythraHub Menu Loaded with all features!")
+-- Laugh Sound
+createButton("Laugh Sound", 0.46, function()
+	local sound = Instance.new("Sound", workspace)
+	sound.SoundId = "rbxassetid://8449305114"
+	sound.Volume = 10
+	sound:Play()
+end)
+
+-- JerkOff Tool R6
+createButton("JerkOff Tool (R6)", 0.57, function()
+	loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
+end)
+
+-- JerkOff Tool R15
+createButton("JerkOff Tool (R15)", 0.68, function()
+	loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
+end)
+
+-- Admin Message (Fake)
+createButton("Fake Admin Message", 0.79, function()
+	local msg = Instance.new("Message", workspace)
+	msg.Text = "[ADMIN] MythraHub injected successfully!"
+	task.delay(3, function() msg:Destroy() end)
+end)
+
+-- Karakter ölünce GUI silinmesin
+player.CharacterAdded:Connect(function()
+	wait(1)
+	gui.Parent = player:WaitForChild("PlayerGui")
+end)
