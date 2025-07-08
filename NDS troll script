@@ -1,110 +1,143 @@
---[[
-  MythraHub | Full GUI Menü
-  İçerikler: BTools, Fly, Fart, Laugh, Screaming, JerkOff Tool (R6 & R15), Admin Message
---]]
+-- MythraHub Full Menü by Hasan
+
+local Players      = game:GetService("Players")
+local RunService   = game:GetService("RunService")
+local player       = Players.LocalPlayer
+local playerGui    = player:WaitForChild("PlayerGui")
 
 -- GUI Oluşturma
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "MythraHub"
-gui.ResetOnSpawn = false
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MythraHub"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
-local toggle = Instance.new("TextButton", gui)
-toggle.Size = UDim2.new(0, 60, 0, 60)
-toggle.Position = UDim2.new(0, 10, 0, 10)
-toggle.Text = "Mythra"
-toggle.BackgroundColor3 = Color3.fromRGB(20,20,20)
-toggle.TextColor3 = Color3.fromRGB(255,255,255)
-toggle.BorderSizePixel = 0
+-- Aç/Kapa Toggle Butonu
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 80, 0, 40)
+toggleBtn.Position = UDim2.new(0, 10, 0, 10)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+toggleBtn.Text = "Mythra"
+toggleBtn.TextColor3 = Color3.new(1,1,1)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 20
+toggleBtn.BorderSizePixel = 0
+toggleBtn.Parent = screenGui
 
-local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 320, 0, 400)
-main.Position = UDim2.new(0, 80, 0, 100)
-main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-main.Visible = true
-main.BorderSizePixel = 0
+-- Ana Menü Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 300, 0, 430)
+mainFrame.Position = UDim2.new(0, 10, 0, 60)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = true
+mainFrame.Parent = screenGui
 
-toggle.MouseButton1Click:Connect(function()
-	main.Visible = not main.Visible
-end)
+-- Yuvarlak Köşe Efekti
+local corner = Instance.new("UICorner", mainFrame)
+corner.CornerRadius = UDim.new(0, 12)
+
+-- Başlık
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1,0,0,40)
+title.Position = UDim2.new(0,0,0,0)
+title.BackgroundTransparency = 1
+title.Text = "MythraHub"
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 24
+title.TextColor3 = Color3.fromRGB(230,230,230)
 
 -- Buton Oluşturma Fonksiyonu
-local function createButton(text, posY, callback)
-	local btn = Instance.new("TextButton", main)
-	btn.Size = UDim2.new(0, 300, 0, 35)
-	btn.Position = UDim2.new(0, 10, 0, posY)
-	btn.Text = text
-	btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	btn.TextColor3 = Color3.new(1,1,1)
-	btn.BorderSizePixel = 0
-	btn.MouseButton1Click:Connect(callback)
+local function createButton(txt, ypos, callback)
+    local btn = Instance.new("TextButton", mainFrame)
+    btn.Size = UDim2.new(0, 280, 0, 35)
+    btn.Position = UDim2.new(0, 10, 0, ypos)
+    btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    btn.Text = txt
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 18
+    btn.TextColor3 = Color3.fromRGB(210,210,210)
+    btn.BorderSizePixel = 0
+    local cr = Instance.new("UICorner", btn)
+    cr.CornerRadius = UDim.new(0,8)
+    btn.MouseEnter:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(60,60,70) end)
+    btn.MouseLeave:Connect(function() btn.BackgroundColor3 = Color3.fromRGB(40,40,40) end)
+    btn.MouseButton1Click:Connect(callback)
+    return btn
 end
 
--- BTools
-createButton("BTools", 0.02, function()
-	loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
+-- Toggle Buton
+
+toggleBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
 end)
 
--- Fly (P tuşuna basınca yukarı zıplar)
-createButton("Fly (P ile uç)", 0.13, function()
-	local UIS = game:GetService("UserInputService")
-	local RunService = game:GetService("RunService")
-	local function move(delta)
-		player.Character:WaitForChild("HumanoidRootPart").CFrame *= CFrame.new(0, 10 * delta, 0)
-	end
-	UIS.InputBegan:Connect(function(input, gameProcessedEvent)
-		if gameProcessedEvent then return end
-		if input.UserInputType == Enum.UserInputType.Keyboard then
-			if input.KeyCode == Enum.KeyCode.P then
-				move(1)
-			end
-		end
-	end)
+-- 1) Fly
+local flying = false
+local flyConn
+createButton("Fly Aç/Kapat", 50, function()
+    flying = not flying
+    if flying then
+        local hrp = player.Character and player.Character:WaitForChild("HumanoidRootPart")
+        flyConn = RunService.RenderStepped:Connect(function(dt)
+            if hrp and flying then
+                hrp.CFrame = hrp.CFrame * CFrame.new(0, 50 * dt, 0)
+            end
+        end)
+    else
+        if flyConn then flyConn:Disconnect() end
+    end
 end)
 
--- Fart Sound
-createButton("Fart Sound", 0.24, function()
-	local sound = Instance.new("Sound", workspace)
-	sound.SoundId = "rbxassetid://8430024127"
-	sound.Volume = 10
-	sound:Play()
+-- 2) BTools
+createButton("BTools", 100, function()
+    loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
 end)
 
--- Screaming Sound
-createButton("Screaming Sound", 0.35, function()
-	local sound = Instance.new("Sound", workspace)
-	sound.SoundId = "rbxassetid://9125712561"
-	sound.Volume = 10
-	sound:Play()
+-- 3) JerkOff Tool R6
+createButton("JerkOff Tool (R6)", 150, function()
+    loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
 end)
 
--- Laugh Sound
-createButton("Laugh Sound", 0.46, function()
-	local sound = Instance.new("Sound", workspace)
-	sound.SoundId = "rbxassetid://8449305114"
-	sound.Volume = 10
-	sound:Play()
+-- 4) JerkOff Tool R15
+createButton("JerkOff Tool (R15)", 200, function()
+    loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
 end)
 
--- JerkOff Tool R6
-createButton("JerkOff Tool (R6)", 0.57, function()
-	loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
+-- 5) Fart Sound
+createButton("Fart Sound", 250, function()
+    local s = Instance.new("Sound", workspace)
+    s.SoundId = "rbxassetid://8430024127"
+    s.Volume = 10
+    s:Play()
+    game:GetService("Debris"):AddItem(s, 3)
 end)
 
--- JerkOff Tool R15
-createButton("JerkOff Tool (R15)", 0.68, function()
-	loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
+-- 6) Screaming Sound
+createButton("Screaming Sound", 300, function()
+    local s = Instance.new("Sound", workspace)
+    s.SoundId = "rbxassetid://9125712561"
+    s.Volume = 10
+    s:Play()
+    game:GetService("Debris"):AddItem(s, 3)
 end)
 
--- Admin Message (Fake)
-createButton("Fake Admin Message", 0.79, function()
-	local msg = Instance.new("Message", workspace)
-	msg.Text = "[ADMIN] MythraHub injected successfully!"
-	task.delay(3, function() msg:Destroy() end)
+-- 7) Laugh Sound
+createButton("Laugh Sound", 350, function()
+    local s = Instance.new("Sound", workspace)
+    s.SoundId = "rbxassetid://8449305114"
+    s.Volume = 10
+    s:Play()
+    game:GetService("Debris"):AddItem(s, 3)
 end)
 
--- Karakter ölünce GUI silinmesin
+-- 8) Fake Admin Message
+createButton("Fake Admin Msg", 400, function()
+    local evt = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+        :WaitForChild("SayMessageRequest")
+    evt:FireServer("[ADMIN] MythraHub activated!", "All")
+end)
+
+-- GUI karakter ölse bile kalır
 player.CharacterAdded:Connect(function()
-	wait(1)
-	gui.Parent = player:WaitForChild("PlayerGui")
+    screenGui.Parent = player:WaitForChild("PlayerGui")
 end)
