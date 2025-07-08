@@ -1,9 +1,8 @@
--- MythraHub Premium GUI Full
+-- MythraHub Tam Menü
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-local TweenService = game:GetService("TweenService")
 
 -- Ana GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -12,223 +11,164 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
 -- Ana Frame
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -210)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.Parent = ScreenGui
-
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 16)
-Corner.Parent = MainFrame
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 300, 0, 400)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+Frame.Active = true
+Frame.Draggable = true
+Frame.ClipsDescendants = true
+Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
 -- Başlık
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 45)
-Title.BackgroundTransparency = 1
-Title.Text = "MythraHub Premium"
-Title.TextColor3 = Color3.fromRGB(230, 230, 230)
+Title.Text = "MythraHub"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 24
-Title.Parent = MainFrame
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Parent = Frame
 
--- Kapatma Butonu
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 36, 0, 36)
-CloseButton.Position = UDim2.new(1, -42, 0, 6)
-CloseButton.BackgroundColor3 = Color3.fromRGB(180, 30, 30)
-CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.TextSize = 28
-CloseButton.AutoButtonColor = true
-CloseButton.Parent = MainFrame
-
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 10)
-CloseCorner.Parent = CloseButton
-
-CloseButton.MouseButton1Click:Connect(function()
+-- Kapatma butonu
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Text = "X"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 20
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+CloseBtn.Size = UDim2.new(0, 40, 0, 40)
+CloseBtn.Position = UDim2.new(1, -45, 0, 5)
+CloseBtn.Parent = Frame
+CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui.Enabled = false
 end)
 
--- Küçültme Butonu
-local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Size = UDim2.new(0, 36, 0, 36)
-MinimizeButton.Position = UDim2.new(0, 6, 0, 6)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
-MinimizeButton.Text = "-"
-MinimizeButton.TextColor3 = Color3.fromRGB(230, 230, 230)
-MinimizeButton.Font = Enum.Font.GothamBold
-MinimizeButton.TextSize = 28
-MinimizeButton.AutoButtonColor = true
-MinimizeButton.Parent = MainFrame
-
-local MinimizeCorner = Instance.new("UICorner")
-MinimizeCorner.CornerRadius = UDim.new(0, 10)
-MinimizeCorner.Parent = MinimizeButton
-
--- Küçültülmüş Frame
-local MinimizedFrame = Instance.new("TextButton")
-MinimizedFrame.Size = UDim2.new(0, 140, 0, 45)
-MinimizedFrame.Position = UDim2.new(0.5, -70, 0.5, -210)
-MinimizedFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-MinimizedFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MinimizedFrame.Text = "MythraHub"
-MinimizedFrame.TextColor3 = Color3.fromRGB(230, 230, 230)
-MinimizedFrame.Font = Enum.Font.GothamBold
-MinimizedFrame.TextSize = 22
-MinimizedFrame.Visible = false
-MinimizedFrame.Parent = ScreenGui
-
-local MinimizedCorner = Instance.new("UICorner")
-MinimizedCorner.CornerRadius = UDim.new(0, 16)
-MinimizedCorner.Parent = MinimizedFrame
-
-MinimizeButton.MouseButton1Click:Connect(function()
-    MainFrame.Visible = false
-    MinimizedFrame.Visible = true
-end)
-
-MinimizedFrame.MouseButton1Click:Connect(function()
-    MinimizedFrame.Visible = false
-    MainFrame.Visible = true
-end)
-
--- Buton Oluşturucu Fonksiyonu
-local buttonSize = UDim2.new(0, 140, 0, 45)
-local buttonSpacingY = 12
-local buttonColor = Color3.fromRGB(50, 50, 55)
-local buttonHoverColor = Color3.fromRGB(75, 75, 85)
-local buttonTextColor = Color3.fromRGB(230, 230, 230)
-local fontUsed = Enum.Font.Gotham
-
-local buttons = {}
-
-local function createButton(text, position, callback)
+-- Buton oluşturma fonksiyonu
+local function createButton(name, position, parent)
     local btn = Instance.new("TextButton")
-    btn.Size = buttonSize
+    btn.Size = UDim2.new(0, 260, 0, 40)
     btn.Position = position
-    btn.BackgroundColor3 = buttonColor
-    btn.TextColor3 = buttonTextColor
-    btn.Font = fontUsed
-    btn.TextSize = 20
-    btn.Text = text
-    btn.AutoButtonColor = true
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 14)
-    corner.Parent = btn
-
-    btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = buttonHoverColor}):Play()
-    end)
-    btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = buttonColor}):Play()
-    end)
-
-    btn.MouseButton1Click:Connect(callback)
-    btn.Parent = MainFrame
-    table.insert(buttons, btn)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.BorderSizePixel = 0
+    btn.Font = Enum.Font.GothamSemibold
+    btn.TextSize = 18
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = name
+    btn.Parent = parent
     return btn
 end
 
--- BTools Script
-local function loadBTools()
-    loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
-end
+-- BTools Butonu
+local BToolsBtn = createButton("BTools Aç/Kapat", UDim2.new(0, 20, 0, 70), Frame)
+local BToolsActive = false
+BToolsBtn.MouseButton1Click:Connect(function()
+    if not BToolsActive then
+        loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/BTools.txt"))()
+        BToolsActive = true
+    else
+        BToolsActive = false
+        -- BTools'u kapatma scripti yoksa restart gerekebilir.
+    end
+end)
 
--- Fly Script (eski stabil versiyon)
-local function loadFly()
-    loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")()
-end
+-- Fly Butonu (Eski sağlam sürüm)
+local FlyBtn = createButton("Fly Aç/Kapat", UDim2.new(0, 20, 0, 120), Frame)
+local flyActive = false
+local bodyGyro, bodyVelocity
+
+FlyBtn.MouseButton1Click:Connect(function()
+    local character = LocalPlayer.Character
+    if not character then return end
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then return end
+
+    flyActive = not flyActive
+
+    if flyActive then
+        bodyGyro = Instance.new("BodyGyro", humanoidRootPart)
+        bodyGyro.P = 9e4
+        bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bodyGyro.CFrame = humanoidRootPart.CFrame
+
+        bodyVelocity = Instance.new("BodyVelocity", humanoidRootPart)
+        bodyVelocity.Velocity = Vector3.new(0,0,0)
+        bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+
+        local UserInputService = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
+        local moveVector = Vector3.new(0,0,0)
+        
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.KeyCode == Enum.KeyCode.W then moveVector = moveVector + workspace.CurrentCamera.CFrame.LookVector end
+            if input.KeyCode == Enum.KeyCode.S then moveVector = moveVector - workspace.CurrentCamera.CFrame.LookVector end
+            if input.KeyCode == Enum.KeyCode.A then moveVector = moveVector - workspace.CurrentCamera.CFrame.RightVector end
+            if input.KeyCode == Enum.KeyCode.D then moveVector = moveVector + workspace.CurrentCamera.CFrame.RightVector end
+            if input.KeyCode == Enum.KeyCode.Space then moveVector = moveVector + Vector3.new(0,1,0) end
+            if input.KeyCode == Enum.KeyCode.LeftControl then moveVector = moveVector - Vector3.new(0,1,0) end
+        end)
+        UserInputService.InputEnded:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.KeyCode == Enum.KeyCode.W then moveVector = moveVector - workspace.CurrentCamera.CFrame.LookVector end
+            if input.KeyCode == Enum.KeyCode.S then moveVector = moveVector + workspace.CurrentCamera.CFrame.LookVector end
+            if input.KeyCode == Enum.KeyCode.A then moveVector = moveVector + workspace.CurrentCamera.CFrame.RightVector end
+            if input.KeyCode == Enum.KeyCode.D then moveVector = moveVector - workspace.CurrentCamera.CFrame.RightVector end
+            if input.KeyCode == Enum.KeyCode.Space then moveVector = moveVector - Vector3.new(0,1,0) end
+            if input.KeyCode == Enum.KeyCode.LeftControl then moveVector = moveVector + Vector3.new(0,1,0) end
+        end)
+
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if flyActive then
+                bodyGyro.CFrame = workspace.CurrentCamera.CFrame
+                bodyVelocity.Velocity = moveVector.Unit * 50
+            else
+                connection:Disconnect()
+            end
+        end)
+
+    else
+        if bodyGyro then bodyGyro:Destroy() end
+        if bodyVelocity then bodyVelocity:Destroy() end
+    end
+end)
 
 -- JerkOff Tool R6
-local function loadJerkOffR6()
+local JerkOffR6Btn = createButton("JerkOff Tool R6", UDim2.new(0, 20, 0, 170), Frame)
+JerkOffR6Btn.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
-end
+end)
 
 -- JerkOff Tool R15
-local function loadJerkOffR15()
+local JerkOffR15Btn = createButton("JerkOff Tool R15", UDim2.new(0, 20, 0, 220), Frame)
+JerkOffR15Btn.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
-end
+end)
 
--- Ses Efekti Çalma (Herkes duysun)
-local function playSound(id)
-    local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://"..id
+-- Fart Sound
+local FartSoundBtn = createButton("Fart Sound", UDim2.new(0, 20, 0, 270), Frame)
+FartSoundBtn.MouseButton1Click:Connect(function()
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://8430024127"
     sound.Volume = 1
-    sound.Parent = workspace
     sound:Play()
-    sound.Ended:Connect(function()
-        sound:Destroy()
-    end)
-end
-
--- Fake Admin Message
-local function fakeAdminMsg(text)
-    local ChatService = game:GetService("StarterGui")
-    ChatService:SetCore("ChatMakeSystemMessage", {
-        Text = "[ADMIN] MythraHub: "..text,
-        Color = Color3.fromRGB(255, 85, 85),
-        Font = Enum.Font.GothamBold,
-        FontSize = Enum.FontSize.Size24
-    })
-end
-
--- Butonlar (Konumlar el ile ayarlandı)
-
-createButton("BTools", UDim2.new(0, 20, 0, 70), loadBTools)
-createButton("Fly", UDim2.new(0, 160, 0, 70), loadFly)
-createButton("JerkOff R6", UDim2.new(0, 20, 0, 130), loadJerkOffR6)
-createButton("JerkOff R15", UDim2.new(0, 160, 0, 130), loadJerkOffR15)
-
-createButton("Fart Sound", UDim2.new(0, 20, 0, 190), function()
-    playSound("8430024127")
-end)
-createButton("Screaming", UDim2.new(0, 160, 0, 190), function()
-    playSound("9125712561")
-end)
-createButton("Laugh", UDim2.new(0, 20, 0, 250), function()
-    playSound("8449305114")
+    game:GetService("Debris"):AddItem(sound, 5)
 end)
 
-createButton("Fake Admin Msg", UDim2.new(0, 160, 0, 250), function()
-    fakeAdminMsg("Hello from MythraHub! Enjoy your game.")
+-- Screaming Sound
+local ScreamSoundBtn = createButton("Scream Sound", UDim2.new(0, 20, 0, 320), Frame)
+ScreamSoundBtn.MouseButton1Click:Connect(function()
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://9125712561"
+    sound.Volume = 1
+    sound:Play()
+    game:GetService("Debris"):AddItem(sound, 5)
 end)
 
-createButton("Spin 1000 Speed", UDim2.new(0, 20, 0, 310), function()
-    local char = LocalPlayer.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+-- Menü Açma/Kapama Tuşu (Oyuncu ölünce GUI silinmesin)
+ScreenGui.ResetOnSpawn = false
 
-    local spinSpeed = 1000
-    local runService = game:GetService("RunService")
-
-    local spinConn
-    spinConn = runService.Heartbeat:Connect(function(delta)
-        if hrp then
-            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(spinSpeed * delta), 0)
-        else
-            spinConn:Disconnect()
-        end
-    end)
-
-    -- 10 saniye sonra durdur
-    delay(10, function()
-        if spinConn then
-            spinConn:Disconnect()
-        end
-    end)
-end)
-
--- Karakter öldüğünde GUI kaybolmasın
-LocalPlayer.CharacterRemoving:Connect(function()
-    wait(0.1)
-    ScreenGui.Parent = PlayerGui
-end)
-
--- Menü hazır, aç
-ScreenGui.Enabled = true
+return ScreenGui
